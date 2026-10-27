@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
+import 'desktop_top_bar.dart';
 
 enum AppDestination {
   create(Icons.auto_awesome_outlined, Icons.auto_awesome, 'Create', '/create'),
@@ -165,95 +166,10 @@ class _TabletShell extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          _NavRail(currentIndex: currentIndex),
+          _DesktopSidebar(currentIndex: currentIndex),
           const VerticalDivider(width: 1),
           Expanded(child: child),
         ],
-      ),
-    );
-  }
-}
-
-class _NavRail extends StatelessWidget {
-  final int currentIndex;
-
-  const _NavRail({required this.currentIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    final s = AppStrings.of(context);
-    return Container(
-      width: 72,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        children: [
-          const _GradientLogo(size: 36),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ListView.builder(
-              itemCount: AppDestination.values.length,
-              itemBuilder: (context, index) {
-                final dest = AppDestination.values[index];
-                final selected = index == currentIndex;
-                return _RailIconItem(
-                  icon: selected ? dest.selectedIcon : dest.icon,
-                  label: _localizedLabel(s, dest),
-                  selected: selected,
-                  onTap: () => context.go(dest.path),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RailIconItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _RailIconItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ext = Theme.of(context).extension<AppColors>()!;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 56,
-          height: 52,
-          decoration: BoxDecoration(
-            color: selected ? ext.accent.withValues(alpha: 0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 22, color: selected ? ext.accent : ext.muted),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  color: selected ? ext.accent : ext.muted,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -268,11 +184,18 @@ class _DesktopShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          _DesktopSidebar(currentIndex: currentIndex),
-          const VerticalDivider(width: 1),
-          Expanded(child: child),
+          const DesktopTopBar(),
+          Expanded(
+            child: Row(
+              children: [
+                _DesktopSidebar(currentIndex: currentIndex),
+                const VerticalDivider(width: 1),
+                Expanded(child: child),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -336,31 +259,29 @@ class _SidebarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ext = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? ext.accent.withValues(alpha: 0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          dense: true,
+          selected: selected,
+          selectedTileColor: scheme.secondaryContainer,
+          hoverColor: scheme.onSurface.withValues(alpha: 0.06),
+          shape: const StadiumBorder(),
+          leading: Icon(icon, size: 20, color: selected ? ext.accent : ext.muted),
+          title: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: selected
+                  ? ext.accent
+                  : scheme.onSurface.withValues(alpha: 0.7),
+            ),
           ),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: selected ? ext.accent : ext.muted),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  color: selected ? ext.accent : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
+          onTap: onTap,
         ),
       ),
     );
