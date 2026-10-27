@@ -261,4 +261,49 @@ void main() {
       expect(saveInputs['images'], ['4', 0]);
     });
   });
+
+  group('ComfyWorkflow extra branches', () {
+    test('generate with img2img ref image', () {
+      final w = ComfyWorkflow.generate(WorkflowInputs(
+        prompt: 'p', model: 'm', seed: 1,
+        refImageFilename: 'in.png', refImageSubfolder: 's', refImageType: 'input',
+        denoise: 0.6,
+      ));
+      expect(w.values.any((n) => n['class_type'] == 'LoadImage'), isTrue);
+    });
+
+    test('generate with controlnet', () {
+      final w = ComfyWorkflow.generate(WorkflowInputs(
+        prompt: 'p', model: 'm', seed: 1,
+        controlnetModel: 'cn.pt', controlImageFilename: 'c.png',
+        controlImageSubfolder: '', controlImageType: 'input',
+      ));
+      expect(w.values.any((n) => n['class_type'] == 'ControlNetApply'), isTrue);
+    });
+
+    test('generate with loras and weights', () {
+      final w = ComfyWorkflow.generate(WorkflowInputs(
+        prompt: 'p', model: 'm', seed: 1, loras: const ['l1'], loraWeights: const {'l1': 0.4},
+      ));
+      expect(w.values.any((n) => n['class_type'] == 'LoraLoader'), isTrue);
+    });
+
+    test('faceRestore GFPGAN and CodeFormer', () {
+      final g = ComfyWorkflow.faceRestore('f.png', 'sub', 'input');
+      expect(g['2']['class_type'], 'GFPGAN');
+      final c = ComfyWorkflow.faceRestore('f.png', 'sub', 'input', useCodeFormer: true);
+      expect(c['2']['class_type'], 'CodeFormerReconstruction');
+    });
+
+    test('upscale scale matching model', () {
+      final w = ComfyWorkflow.upscale('f.png', '', '', model: 'RealESRGAN_x4plus.pth', scale: 4.0);
+      expect(w, isA<Map<String, dynamic>>());
+    });
+
+    test('inpaint workflow', () {
+      final w = ComfyWorkflow.inpaint('img.png', 'sub', 'input', 'mask.png', '', 'input',
+          prompt: 'p', model: 'm', loras: const ['l'], loraWeights: const {'l': 0.5});
+      expect(w.values.any((n) => n['class_type'] == 'LoadImage'), isTrue);
+    });
+  });
 }
