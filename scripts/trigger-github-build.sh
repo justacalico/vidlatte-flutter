@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Load per-project CI config (APP_NAME, APP_ID, GITHUB_REPO, GITLAB_PROJECT)
-_CI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+_CI_DIR="$(cd "$(dirname "$0")" && pwd)"
 [ -f "$_CI_DIR/ci.env" ] && . "$_CI_DIR/ci.env"
 
 # Trigger a GitHub Actions "Build and Release" workflow and block while
@@ -17,7 +17,7 @@ BUILD_ALL="${2:-true}"
 CREATE_RELEASE="${3:-false}"
 PUSH_REF="${4:-HEAD}"
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BASE_DIR="$(cd "$(dirname "$(basename "$0")")/.." && pwd)"
 
 PUSHED_SHA=""
 if [ -n "$PUSH_REF" ]; then
