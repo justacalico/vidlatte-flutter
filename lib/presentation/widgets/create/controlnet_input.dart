@@ -77,7 +77,7 @@ class _ControlNetInputState extends State<ControlNetInput> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: widget.selectedModel,
+          initialValue: widget.selectedModel,
           decoration: InputDecoration(
             isDense: true,
             prefixIcon: const Icon(Icons.account_tree, size: 18),

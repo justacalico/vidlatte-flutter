@@ -4,8 +4,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/generation/generation_bloc.dart';
-import 'package:vidlatte/bloc/generation/generation_event.dart';
-import 'package:vidlatte/bloc/generation/generation_state.dart';
 import 'package:vidlatte/data/models/comfy_server.dart';
 import 'package:vidlatte/data/models/generated_image.dart';
 import 'package:vidlatte/services/comfyui_service.dart';

@@ -177,7 +177,9 @@ class TriggerWordExtractor {
   static void _extractFromDatasetNames(Map<String, dynamic> tagFreq, void Function(String, int, int) add) {
     for (final key in tagFreq.keys) {
       var p = key;
-      while (p.isNotEmpty && _isDigit(p.codeUnitAt(0))) p = p.substring(1);
+      while (p.isNotEmpty && _isDigit(p.codeUnitAt(0))) {
+        p = p.substring(1);
+      }
       if (p.isNotEmpty && p[0] == '_') p = p.substring(1);
       if (p.isEmpty) continue;
       if (!_isGenericDataset(p)) add(p, 0, 3);

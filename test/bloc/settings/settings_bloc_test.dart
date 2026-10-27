@@ -2,8 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/settings/settings_bloc.dart';
-import 'package:vidlatte/bloc/settings/settings_event.dart';
-import 'package:vidlatte/bloc/settings/settings_state.dart';
 import 'package:vidlatte/data/models/app_settings.dart';
 import 'package:vidlatte/services/storage_service.dart';
 

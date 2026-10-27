@@ -7,11 +7,9 @@ import 'package:uuid/uuid.dart';
 import '../../data/models/comfy_server.dart';
 import '../../data/models/generated_image.dart';
 import '../../data/models/llm_model.dart';
-import '../../data/models/llm_server.dart';
 import '../../services/comfyui_service.dart';
 import '../../services/llm_service.dart';
 import '../../services/storage_service.dart';
-import 'autogen_event.dart';
 import 'autogen_state.dart';
 
 export 'autogen_event.dart';
@@ -26,12 +24,11 @@ class AutoGenBloc extends Bloc<AutoGenEvent, AutoGenState> {
   bool _cancelToken = false;
 
   AutoGenBloc({
-    required StorageService storage,
+    required this._storage,
     LlmService? llm,
     ComfyService? comfy,
     Uuid? uuid,
-  })  : _storage = storage,
-        _llm = llm ?? LlmService(),
+  })  : _llm = llm ?? LlmService(),
         _comfy = comfy ?? ComfyService(),
         _uuid = uuid ?? const Uuid(),
         super(const AutoGenState()) {

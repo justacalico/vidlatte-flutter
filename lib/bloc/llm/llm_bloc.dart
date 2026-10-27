@@ -17,11 +17,10 @@ class LlmBloc extends Bloc<LlmEvent, LlmState> {
   final Uuid _uuid;
 
   LlmBloc({
-    required StorageService storage,
+    required this._storage,
     LlmService? llm,
     Uuid? uuid,
-  })  : _storage = storage,
-        _llm = llm ?? LlmService(),
+  })  : _llm = llm ?? LlmService(),
         _uuid = uuid ?? const Uuid(),
         super(const LlmState()) {
     on<LlmLoadRequested>(_onLoad);
@@ -117,10 +116,6 @@ class LlmBloc extends Bloc<LlmEvent, LlmState> {
   Future<void> _onHealthCheck(LlmHealthCheckRequested event, Emitter<LlmState> emit) async {
     final server = _storage.getLlmServer(event.serverId);
     if (server == null) return;
-    final health = LlmHealthStatus(
-      serverId: event.serverId,
-      checkedAt: DateTime.now(),
-    );
     try {
       final ok = await _llm.testConnection(server);
       final newHealth = Map<String, LlmHealthStatus>.from(state.healthStatuses);

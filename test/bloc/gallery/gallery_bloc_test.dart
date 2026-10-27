@@ -2,8 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/gallery/gallery_bloc.dart';
-import 'package:vidlatte/bloc/gallery/gallery_event.dart';
-import 'package:vidlatte/bloc/gallery/gallery_state.dart';
 import 'package:vidlatte/data/models/app_settings.dart';
 import 'package:vidlatte/data/models/generated_image.dart';
 import 'package:vidlatte/services/storage_service.dart';

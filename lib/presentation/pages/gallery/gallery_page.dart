@@ -662,32 +662,6 @@ class _GalleryPageState extends State<GalleryPage> {
     );
   }
 
-  void _showPlaylistsPanel(BuildContext context, GalleryState state) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => _PlaylistsPanel(
-        collections: state.collections,
-        allImages: state.allImages,
-        selectedCollectionId: state.selectedCollectionId,
-        onSelect: (id) {
-          context.read<GalleryBloc>().add(GalleryCollectionSelected(id));
-          Navigator.of(ctx).pop();
-        },
-        onCreate: () {
-          Navigator.of(ctx).pop();
-          _showCreateDialog(context);
-        },
-        onRename: (collection) {
-          Navigator.of(ctx).pop();
-          _showRenameDialog(context, collection);
-        },
-        onDelete: (collection) {
-          Navigator.of(ctx).pop();
-          _confirmDeleteCollection(context, collection);
-        },
-      ),
-    );
-  }
 
   void _showCreateDialog(BuildContext context) {
     final s = AppStrings.of(context);
@@ -961,94 +935,6 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 }
 
-class _PlaylistsPanel extends StatelessWidget {
-  final List<Collection> collections;
-  final List<GeneratedImage> allImages;
-  final String? selectedCollectionId;
-  final void Function(String) onSelect;
-  final VoidCallback onCreate;
-  final void Function(Collection) onRename;
-  final void Function(Collection) onDelete;
-
-  const _PlaylistsPanel({
-    required this.collections,
-    required this.allImages,
-    required this.selectedCollectionId,
-    required this.onSelect,
-    required this.onCreate,
-    required this.onRename,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ext = Theme.of(context).extension<AppColors>()!;
-    final s = AppStrings.of(context);
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(ThemeConstants.spacingMedium),
-            child: Row(
-              children: [
-                Icon(Icons.playlist_play, size: 22, color: ext.accent),
-                const SizedBox(width: 8),
-                Text(s.playlists, style: Theme.of(context).textTheme.titleMedium),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: onCreate,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(s.new_),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          if (collections.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(ThemeConstants.spacingXLarge),
-              child: Text(s.noPlaylistsYetNew),
-            )
-          else
-            ...collections.map((c) {
-              final count = allImages.where((img) => img.collectionId == c.id).length;
-              final selected = c.id == selectedCollectionId;
-              return ListTile(
-                leading: Icon(
-                  Icons.playlist_play,
-                  color: selected ? ext.accent : ext.muted,
-                ),
-                title: Text(
-                  c.name,
-                  style: TextStyle(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    color: selected ? ext.accent : null,
-                  ),
-                ),
-                subtitle: Text(s.imagesCount(count)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit_outlined, size: 18, color: ext.muted),
-                      onPressed: () => onRename(c),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete_outline, size: 18, color: ext.muted),
-                      onPressed: () => onDelete(c),
-                    ),
-                  ],
-                ),
-                onTap: () => onSelect(c.id),
-              );
-            }),
-          const SizedBox(height: ThemeConstants.spacingSmall),
-        ],
-      ),
-    );
-  }
-}
 
 class _FilterSegment extends StatelessWidget {
   final String label;

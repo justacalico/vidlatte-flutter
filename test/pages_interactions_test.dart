@@ -108,7 +108,7 @@ void main() {
   testWidgets('shell: sidebar pill navigates', (t) async {
     await pumpPage(
       t,
-      AppShell(child: const GalleryPage(), currentIndex: 1),
+      AppShell(currentIndex: 1, child: const GalleryPage()),
       size: const Size(1280, 800),
     );
     expect(find.text('Gallery'), findsWidgets);

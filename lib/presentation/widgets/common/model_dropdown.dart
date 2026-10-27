@@ -49,7 +49,7 @@ class ModelDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: selectedModel,
+          initialValue: selectedModel,
           decoration: InputDecoration(
             hintText: hintText,
             isDense: true,

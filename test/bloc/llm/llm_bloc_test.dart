@@ -2,8 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/llm/llm_bloc.dart';
-import 'package:vidlatte/bloc/llm/llm_event.dart';
-import 'package:vidlatte/bloc/llm/llm_state.dart';
 import 'package:vidlatte/data/models/llm_model.dart';
 import 'package:vidlatte/data/models/llm_server.dart';
 import 'package:vidlatte/services/llm_service.dart';

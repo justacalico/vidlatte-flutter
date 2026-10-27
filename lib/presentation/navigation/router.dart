@@ -19,7 +19,7 @@ class AppRouter {
       ShellRoute(
         builder: (context, state, child) {
           final index = _indexFromLocation(state.uri.toString());
-          return AppShell(child: child, currentIndex: index);
+          return AppShell(currentIndex: index, child: child);
         },
         routes: [
           GoRoute(

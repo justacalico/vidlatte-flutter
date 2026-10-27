@@ -348,7 +348,7 @@ class _SessionDetailState extends State<_SessionDetail> {
             PromptInput(controller: _promptController, negativeController: _negativePromptController, maxLength: ComfyConstants.maxPromptLength),
             const SizedBox(height: ThemeConstants.spacingMedium),
             GenerationControls(
-              models: catalog?.models as List<String>? ?? [],
+              models: catalog?.models ?? [],
               loras: visibleLoras,
               triggerWords: triggerWords,
               maxLoras: effectiveServer.maxLoras,

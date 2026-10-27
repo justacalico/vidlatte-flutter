@@ -80,7 +80,7 @@ class _ImageCard extends StatelessWidget {
               Image.file(
                 File(image.localPath!),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   height: 200,
                   color: ext.surfaceElevated,
                   child: Center(child: Icon(Icons.broken_image_outlined, size: 36, color: ext.muted)),

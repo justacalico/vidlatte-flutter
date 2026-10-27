@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +15,7 @@ void main() {
   runApp(const LandingApp());
 }
 
-ThemeData _theme(Brightness brightness, {bool oled = false}) {
+ThemeData _buildTheme(Brightness brightness, {bool oled = false}) {
   final scheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFFB5663D),
     brightness: brightness,
@@ -71,9 +70,9 @@ class _LandingAppState extends State<LandingApp> {
     return MaterialApp(
       title: 'Vidlatte',
       debugShowCheckedModeBanner: false,
-      theme: _theme(Brightness.light),
-      darkTheme: _theme(Brightness.dark, oled: _theme == 'oled'),
-      highContrastDarkTheme: _theme(Brightness.dark, oled: _theme == 'oled'),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark, oled: _theme == 'oled'),
+      highContrastDarkTheme: _buildTheme(Brightness.dark, oled: _theme == 'oled'),
       themeMode: switch (_theme) {
         'light' => ThemeMode.light,
         'dark' || 'oled' => ThemeMode.dark,
@@ -309,14 +308,14 @@ class _ScreensRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _shots.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, i) => ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
             _shots[i],
             height: 320,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
           ),
         ),
       ),

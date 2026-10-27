@@ -148,6 +148,7 @@ class _InpaintPageState extends State<InpaintPage> {
       comfy.dispose();
 
       if (result.success && result.imageBytes != null) {
+        if (!mounted) return;
         final storage = context.read<StorageService>();
         final uuid = DateTime.now().millisecondsSinceEpoch.toString();
         final filename = 'inpaint_$uuid.png';
@@ -284,7 +285,7 @@ class _InpaintPageState extends State<InpaintPage> {
                           ),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedModel.isEmpty ? null : _selectedModel,
+                            initialValue: _selectedModel.isEmpty ? null : _selectedModel,
                             decoration: InputDecoration(
                               hintText: models.isEmpty ? s.loadingModels : s.selectModelHint,
                               isDense: true,

@@ -37,14 +37,14 @@ class AppShell extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
 
     if (width >= ThemeConstants.desktopBreakpoint) {
-      return _DesktopShell(child: child, currentIndex: currentIndex);
+      return _DesktopShell(currentIndex: currentIndex, child: child);
     }
 
     if (width >= ThemeConstants.tabletBreakpoint) {
-      return _TabletShell(child: child, currentIndex: currentIndex);
+      return _TabletShell(currentIndex: currentIndex, child: child);
     }
 
-    return _PhoneShell(child: child, currentIndex: currentIndex);
+    return _PhoneShell(currentIndex: currentIndex, child: child);
   }
 }
 

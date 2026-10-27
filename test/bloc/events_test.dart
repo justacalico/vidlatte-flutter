@@ -14,7 +14,6 @@ import 'package:vidlatte/data/models/generation_job.dart';
 import 'package:vidlatte/data/models/llm_server.dart';
 import 'package:vidlatte/data/models/lora_metadata.dart';
 import 'package:vidlatte/data/models/studio_session.dart';
-import 'package:vidlatte/bloc/autogen/autogen_state.dart' show AutoGenMode;
 
 final _d = DateTime(2024);
 final aimg = AutoGenImage(id: 'a', prompt: 'p', createdAt: _d);
@@ -86,14 +85,14 @@ void main() {
       const LoraMetadataLoadRequested('x'),
       LoraMetadataSaveRequested('x', [lm]),
       const LoraTriggerWordsSaveRequested('x', {'a': 'b'}),
-      const LoraVisibilitySaveRequested('x', const <String>{}),
-      const LoraTriggerWordsFetchRequested('x', const <String>[]),
+      const LoraVisibilitySaveRequested('x', <String>{}),
+      const LoraTriggerWordsFetchRequested('x', <String>[]),
       SettingsLoadRequested(),
       SettingsUpdated(settings),
       const ThemeModeChanged('x'),
       const DefaultServerChanged('x'),
       const LastModelChanged('x'),
-      const LastLorasChanged(const <String>[]),
+      const LastLorasChanged(<String>[]),
       const LastCreativityChanged('x'),
       const LocaleChanged('x'),
       StudioLoadRequested(),
@@ -104,7 +103,7 @@ void main() {
       StudioImageAdded('x', img),
       const StudioSessionPromptChanged('x', 'x'),
       const StudioSessionModelChanged('x', 'x'),
-      const StudioSessionLorasChanged('x', const <String>[]),
+      const StudioSessionLorasChanged('x', <String>[]),
       const StudioImageRemoved('x', 'x'),
     ];
     for (final e in events) {

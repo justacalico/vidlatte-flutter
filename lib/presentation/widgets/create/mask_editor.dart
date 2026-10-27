@@ -44,7 +44,7 @@ class MaskEditorState extends State<MaskEditor> {
 
   void clearMask() {
     _strokes.clear();
-    _repaintNotifier.notifyListeners();
+    _repaintNotifier.value++;
   }
 
   Future<Uint8List> exportMask() async {
@@ -121,10 +121,10 @@ class MaskEditorState extends State<MaskEditor> {
                 final point = _toImageCoords(details.localPosition, Size(displayWidth, displayHeight));
                 _points.add(point);
                 _strokes.last.add(point);
-                _repaintNotifier.notifyListeners();
+                _repaintNotifier.value++;
               },
               onPanEnd: (_) {
-                _repaintNotifier.notifyListeners();
+                _repaintNotifier.value++;
               },
               child: ClipRect(
                 child: CustomPaint(

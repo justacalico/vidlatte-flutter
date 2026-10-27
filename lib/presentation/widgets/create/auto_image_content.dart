@@ -431,7 +431,7 @@ class _AutoImageContentState extends State<AutoImageContent> {
                     ),
                     const SizedBox(height: ThemeConstants.spacingSmall),
                     DropdownButtonFormField<String>(
-                      value: _selectedLlmModel,
+                      initialValue: _selectedLlmModel,
                       decoration: const InputDecoration(isDense: true),
                       items: (state.models[_selectedLlmServerId] ?? [])
                           .map((m) => DropdownMenuItem(
@@ -501,7 +501,7 @@ class _AutoImageContentState extends State<AutoImageContent> {
                     ),
                     const SizedBox(height: ThemeConstants.spacingSmall),
                     DropdownButtonFormField<String>(
-                      value: _imageModel.isEmpty ? null : _imageModel,
+                      initialValue: _imageModel.isEmpty ? null : _imageModel,
                       decoration: const InputDecoration(isDense: true),
                       items: (state.catalogs[_selectedImageServerId]?.models ??
                               [])
@@ -657,15 +657,16 @@ class _AutoImageContentState extends State<AutoImageContent> {
 
   Widget _buildSectionCard(BuildContext context, {required Widget child}) {
     final ext = Theme.of(context).extension<AppColors>()!;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(ThemeConstants.spacingMedium),
-      decoration: BoxDecoration(
-        color: ext.surfaceElevated,
-        border: Border.all(color: ext.border, width: 0.5),
+    return Material(
+      color: ext.surfaceElevated,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: ext.border, width: 0.5),
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
       ),
-      child: child,
+      child: Padding(
+        padding: const EdgeInsets.all(ThemeConstants.spacingMedium),
+        child: SizedBox(width: double.infinity, child: child),
+      ),
     );
   }
 
@@ -904,7 +905,7 @@ class _AutoImageCard extends StatelessWidget {
             Image.file(
               File(image.localPath!),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 color: ext.surfaceElevated,
                 child: Center(
                     child: Icon(Icons.broken_image, size: 32, color: ext.muted)),

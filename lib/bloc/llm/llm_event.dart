@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:vidlatte/data/models/llm_model.dart';
 import 'package:vidlatte/data/models/llm_server.dart';
 
 sealed class LlmEvent extends Equatable {

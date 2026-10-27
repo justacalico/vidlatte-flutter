@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vidlatte/data/models/comfy_server.dart';
-import 'package:vidlatte/data/models/generation_job.dart';
 import 'package:vidlatte/services/comfyui_service.dart';
 
 class _RealHttp extends HttpOverrides {}
@@ -14,7 +12,6 @@ void main() {
   late HttpServer server;
   late ComfyServer comfy;
   late ComfyService svc;
-  String? lastWsPath;
 
   setUpAll(() async {
     HttpOverrides.global = _RealHttp();
@@ -22,7 +19,6 @@ void main() {
     server.listen((req) async {
       if (req.uri.path == '/ws') {
         final ws = await WebSocketTransformer.upgrade(req);
-        lastWsPath = req.uri.path;
         ws.add(jsonEncode({'type': 'executing', 'data': {'node': '5', 'prompt_id': 'p'}}));
         ws.add(jsonEncode({'type': 'progress', 'data': {'value': 2, 'max': 10}}));
         ws.add(jsonEncode({'type': 'executed', 'data': {'node': '5'}}));

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/data/models/comfy_server.dart';
 import 'package:vidlatte/data/models/generated_image.dart';
 import 'package:vidlatte/data/models/generation_job.dart';

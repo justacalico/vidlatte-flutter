@@ -3,8 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/autogen/autogen_bloc.dart';
-import 'package:vidlatte/bloc/autogen/autogen_event.dart';
-import 'package:vidlatte/bloc/autogen/autogen_state.dart';
 import 'package:vidlatte/data/models/comfy_server.dart';
 import 'package:vidlatte/data/models/llm_model.dart';
 import 'package:vidlatte/data/models/llm_server.dart';

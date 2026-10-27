@@ -29,7 +29,7 @@ void main() {
       testWidgets('${entry.key} desktop golden$suffix', (tester) async {
         await pumpPage(
           tester,
-          AppShell(child: entry.value.$2, currentIndex: entry.value.$1),
+          AppShell(currentIndex: entry.value.$1, child: entry.value.$2),
           size: desktop,
           locale: loc,
         );
@@ -43,7 +43,7 @@ void main() {
     testWidgets('${entry.key} phone golden', (tester) async {
       await pumpPage(
         tester,
-        AppShell(child: entry.value.$2, currentIndex: entry.value.$1),
+        AppShell(currentIndex: entry.value.$1, child: entry.value.$2),
         size: phone,
       );
       await expectLater(

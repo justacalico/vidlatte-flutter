@@ -675,7 +675,6 @@ class _CreatePageState extends State<CreatePage> {
 
   Widget _buildModeToggle(BuildContext context) {
     final s = AppStrings.of(context);
-    final ext = Theme.of(context).extension<AppColors>()!;
     return SegmentedButton<bool>(
       segments: [
         ButtonSegment(

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vidlatte/bloc/prompt_history/prompt_history_bloc.dart';
-import 'package:vidlatte/bloc/prompt_history/prompt_history_event.dart';
 import 'package:vidlatte/data/models/prompt_history_entry.dart';
 
 import '../helpers.dart';
