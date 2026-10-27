@@ -23,8 +23,15 @@ import 'package:vidlatte/data/models/prompt_history_entry.dart';
 import 'package:vidlatte/data/models/studio_session.dart';
 import 'package:vidlatte/config/theme.dart';
 import 'package:vidlatte/l10n/app_strings.dart';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:vidlatte/services/comfyui_service.dart';
 import 'package:vidlatte/services/llm_service.dart';
+import 'package:vidlatte/data/models/comfy_server.dart';
+import 'package:vidlatte/data/models/llm_model.dart';
+import 'package:vidlatte/data/models/llm_server.dart';
+import 'package:vidlatte/data/models/model_catalog.dart';
 import 'package:vidlatte/services/storage_service.dart';
 import 'package:vidlatte/services/update_checker.dart';
 
@@ -91,6 +98,8 @@ Widget testApp({
   ComfyService? comfy,
   LlmService? llm,
 }) {
+  comfy ??= FakeComfyService();
+  llm ??= FakeLlmService();
   return MultiRepositoryProvider(
     providers: [
       RepositoryProvider<StorageService>.value(value: storage),
@@ -149,4 +158,51 @@ Future<void> pumpPage(
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
   }
+}
+
+class FakeComfyService extends ComfyService {
+  @override
+  Future<ServerHealth> checkHealth(ComfyServer server) async =>
+      ServerHealth(serverId: server.id, healthy: false, error: 'offline', checkedAt: DateTime(2024));
+  @override
+  Future<ModelCatalog> getModels(ComfyServer server) async => ModelCatalog(
+      serverId: server.id, models: const [], loras: const [], controlnets: const [],
+      upscaleModels: const [], maxLoras: 5, fetchedAt: DateTime(2024));
+  @override
+  Future<Map<String, dynamic>?> getLoraMetadata(ComfyServer server, String loraName) async => null;
+  @override
+  Future<String> submitWorkflow(ComfyServer server, Map<String, dynamic> workflow) async =>
+      throw ComfyApiException('offline');
+  @override
+  Future<ComfyJobResult> pollForResult(ComfyServer server, String promptId, {void Function(PreviewMessage)? onPreview, int? maxAttempts}) async =>
+      const ComfyJobResult(success: false, error: 'offline');
+  @override
+  Future<ComfyJobResult> generateImage(ComfyServer server, {required String prompt, required String model, String negativePrompt = '', List<String> loras = const [], Map<String, double> loraWeights = const {}, Creativity creativity = Creativity.normal, double? cfg, int? steps, bool? hiresFix, int width = 768, int height = 768, int? seed, String? refImageFilename, String? refImageSubfolder, String? refImageType, double denoise = 0.5, String? controlnetModel, String? controlImageFilename, String? controlImageSubfolder, String? controlImageType, double controlnetStrength = 1.0, void Function(PreviewMessage)? onPreview}) async =>
+      const ComfyJobResult(success: false, error: 'offline');
+  @override
+  Future<ComfyJobResult> faceRestore(ComfyServer server, {required String filename, String subfolder = '', String type = 'output', double strength = 0.7, bool useCodeFormer = false, void Function(PreviewMessage)? onPreview}) async =>
+      const ComfyJobResult(success: false, error: 'offline');
+  @override
+  Future<ComfyJobResult> upscale(ComfyServer server, {required String filename, String subfolder = '', String type = 'output', String model = 'm.pth', double scale = 2.0, void Function(PreviewMessage)? onPreview}) async =>
+      const ComfyJobResult(success: false, error: 'offline');
+  @override
+  Future<ComfyJobResult> inpaint(ComfyServer server, {required String imageFilename, String imageSubfolder = '', String imageType = 'input', required String maskFilename, String maskSubfolder = '', String maskType = 'input', required String prompt, String negativePrompt = '', required String model, List<String> loras = const [], Map<String, double> loraWeights = const {}, int? seed, int steps = 20, double cfg = 7.0, double denoise = 0.75, void Function(PreviewMessage)? onPreview}) async =>
+      const ComfyJobResult(success: false, error: 'offline');
+  @override
+  Future<Uint8List> getImage(ComfyServer server, String filename, String subfolder, String type) async =>
+      Uint8List(0);
+  @override
+  Future<({String filename, String subfolder, String type})> uploadImage(ComfyServer server, Uint8List bytes, String filename) async =>
+      throw ComfyApiException('offline');
+}
+
+class FakeLlmService extends LlmService {
+  FakeLlmService() : super(dio: Dio());
+  @override
+  Future<bool> testConnection(LlmServer server) async => false;
+  @override
+  Future<List<LlmModel>> getModels(LlmServer server) async => const [];
+  @override
+  Future<LlmChatResult> chatCompletion({required LlmServer server, required String model, required List<LlmChatMessage> messages, double? temperature, int? maxTokens}) async =>
+      const LlmChatResult(success: false, content: '', error: 'offline');
 }
