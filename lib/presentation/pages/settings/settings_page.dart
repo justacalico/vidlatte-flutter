@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../bloc/llm/llm_bloc.dart';
+import '../../../services/update_checker.dart';
 import '../../../bloc/servers/servers_bloc.dart';
 import '../../../bloc/settings/settings_bloc.dart';
 import '../../../config/constants.dart';
@@ -10,7 +12,7 @@ import '../../../data/models/comfy_server.dart';
 import '../../../data/models/llm_server.dart';
 import '../../../data/models/model_catalog.dart';
 import '../../widgets/common/empty_state.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -42,6 +44,8 @@ class _SettingsPageState extends State<SettingsPage> {
           _LlmServersSection(),
           const SizedBox(height: ThemeConstants.spacingLarge),
           _GalleryPrivacySection(),
+          const SizedBox(height: ThemeConstants.spacingLarge),
+          _AboutSection(),
         ],
       ),
     );
@@ -197,9 +201,10 @@ class _LanguageSection extends StatelessWidget {
 
     const options = [
       ('system', 'System', Icons.language),
-      ('en', 'English', Icons.language),
+      ('en-GB', 'Traditional English', Icons.language),
       ('zh', '简体中文', Icons.language),
       ('ru', 'Русский', Icons.language),
+      ('ga', 'Gaeilge', Icons.language),
     ];
 
     return _SectionCard(
@@ -1214,6 +1219,83 @@ class _GalleryPrivacySection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AboutSection extends StatefulWidget {
+  @override
+  State<_AboutSection> createState() => _AboutSectionState();
+}
+
+class _AboutSectionState extends State<_AboutSection> {
+  String? _installedVersion;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<UpdateChecker>().installedVersion().then((v) {
+      if (mounted) setState(() => _installedVersion = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final checker = context.watch<UpdateChecker>();
+    final result = checker.lastResult;
+
+    String subtitle = _installedVersion != null
+        ? s.currentVersionLabel(_installedVersion!)
+        : s.appName;
+    if (checker.status == UpdateCheckStatus.checking) {
+      subtitle = s.checkingForUpdates;
+    } else if (checker.status == UpdateCheckStatus.failed) {
+      subtitle = s.updateCheckFailed;
+    } else if (result != null && result.updateAvailable) {
+      subtitle = s.newVersionAvailable(result.latestVersion);
+    } else if (checker.status == UpdateCheckStatus.upToDate) {
+      subtitle = s.appUpToDate;
+    }
+
+    return _SectionCard(
+      title: s.about,
+      subtitle: subtitle,
+      children: [
+        Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.system_update_alt),
+            title: Text(s.checkForUpdates),
+            trailing: checker.status == UpdateCheckStatus.checking
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.chevron_right),
+            onTap: checker.status == UpdateCheckStatus.checking
+                ? null
+                : () => checker.check(),
+          ),
+        ),
+        if (result != null && result.updateAvailable) ...[
+          TextButton.icon(
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: Text(s.openRelease),
+            onPressed: () =>
+                launchUrl(Uri.parse(result.releaseUrl)),
+          ),
+        ],
+        TextButton.icon(
+          icon: const Icon(Icons.open_in_new, size: 16),
+          label: Text(s.allReleases),
+          onPressed: () =>
+              launchUrl(Uri.parse(UpdateChecker.releasesUrl)),
+        ),
+      ],
     );
   }
 }

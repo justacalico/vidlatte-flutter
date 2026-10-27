@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 import 'bloc/autogen/autogen_bloc.dart';
 import 'bloc/gallery/gallery_bloc.dart';
@@ -11,9 +11,10 @@ import 'bloc/servers/servers_bloc.dart';
 import 'bloc/settings/settings_bloc.dart';
 import 'bloc/studio/studio_bloc.dart';
 import 'config/theme.dart';
-import 'i18n/app_localizations.dart';
+import 'l10n/app_strings.dart';
 import 'presentation/navigation/router.dart';
 import 'services/storage_service.dart';
+import 'services/update_checker.dart';
 
 class VidlatteApp extends StatelessWidget {
   final StorageService storageService;
@@ -22,8 +23,11 @@ class VidlatteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: storageService,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: storageService),
+        ChangeNotifierProvider(create: (_) => UpdateChecker()),
+      ],
       child: MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -58,9 +62,7 @@ class VidlatteApp extends StatelessWidget {
             'dark' => ThemeMode.dark,
             _ => ThemeMode.system,
           };
-          final locale = state.settings.locale == 'system'
-              ? null
-              : Locale(state.settings.locale);
+          final locale = _localeFromTag(state.settings.locale);
           return MaterialApp.router(
             title: 'Vidlatte',
             debugShowCheckedModeBanner: false,
@@ -68,26 +70,31 @@ class VidlatteApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
             locale: locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: [
-              AppLocalizations(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            localeResolutionCallback: (deviceLocale, supported) {
-              for (final loc in supported) {
-                if (loc.languageCode == deviceLocale?.languageCode) {
-                  return loc;
-                }
-              }
-              return const Locale('en');
-            },
+            supportedLocales: AppStrings.supportedLocales,
+            localizationsDelegates: AppStrings.localizationsDelegates,
             routerConfig: AppRouter.config,
           );
         },
       ),
       ),
     );
+  }
+}
+
+Locale? _localeFromTag(String tag) {
+  switch (tag) {
+    case 'system':
+      return null;
+    case 'en':
+    case 'en-GB':
+      return const Locale('en', 'GB');
+    case 'zh':
+      return const Locale('zh');
+    case 'ru':
+      return const Locale('ru');
+    case 'ga':
+      return const Locale('ga');
+    default:
+      return null;
   }
 }
