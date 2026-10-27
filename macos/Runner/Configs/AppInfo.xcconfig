@@ -8,7 +8,7 @@
 PRODUCT_NAME = vidlatte
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.vidlatte.vidlatte
+PRODUCT_BUNDLE_IDENTIFIER = gitlab.httpanimations.vidlatte
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.vidlatte. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 gitlab.httpanimations. All rights reserved.

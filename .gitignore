@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/release
 # vidlatte-source/
 /vidlatte-source/
+
+# Android signing
+key.properties
+*.jks
+android/app/key.properties
+android/app/*.jks

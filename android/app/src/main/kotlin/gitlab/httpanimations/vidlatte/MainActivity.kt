@@ -1,4 +1,4 @@
-package com.vidlatte.vidlatte
+package gitlab.httpanimations.vidlatte
 
 import io.flutter.embedding.android.FlutterActivity
 
