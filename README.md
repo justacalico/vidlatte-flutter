@@ -7,7 +7,9 @@ A standalone AI image generation app powered by ComfyUI. Connect to one or more 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20Web-lightgrey.svg)
 ![Flutter](https://img.shields.io/badge/Flutter-stable-blue.svg)
-![Nightly](https://img.shields.io/badge/release-nightly-orange.svg)
+[![Pipeline](https://gitlab.com/HttpAnimations/vidlatte-flutter/badges/main/pipeline.svg)](https://gitlab.com/HttpAnimations/vidlatte-flutter/-/pipelines)
+[![Release](https://gitlab.com/HttpAnimations/vidlatte-flutter/-/badges/release.svg)](https://gitlab.com/HttpAnimations/vidlatte-flutter/-/releases)
+[![Pages](https://img.shields.io/badge/pages-live-brightgreen.svg)](https://httpanimations.gitlab.io/vidlatte-flutter/)
 
 ## Features
 
@@ -137,3 +139,24 @@ The repository is hosted on GitLab and mirrored to GitHub. Please open merge req
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+
+## Download
+
+Get the latest build on the [landing page](https://httpanimations.gitlab.io/vidlatte-flutter/) or from [GitLab Releases](https://gitlab.com/HttpAnimations/vidlatte-flutter/-/releases).
+
+AltStore source: `https://gitlab.com/HttpAnimations/vidlatte-flutter/-/raw/main/repos/altstore.json`
+
+Linux (Flatpak):
+
+```
+curl -fLO https://httpanimations.gitlab.io/vidlatte-flutter/flatpak/key.gpg
+flatpak remote-add --if-not-exists --gpg-import=key.gpg vidlatte https://httpanimations.gitlab.io/vidlatte-flutter/flatpak
+flatpak install vidlatte gitlab.httpanimations.vidlatte
+```
+
+## Screenshots
+
+![Create](test/goldens/goldens/create_desktop.png)
+![Gallery](test/goldens/goldens/gallery_desktop.png)
+![Settings](test/goldens/goldens/settings_desktop.png)
