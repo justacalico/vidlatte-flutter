@@ -1,0 +1,56 @@
+{
+  "appName": "Vidlatte",
+  "tagline": "Your ComfyUI studio, distilled.",
+  "heroSub": "Generate images with your own ComfyUI servers. Full control over models, LoRAs, ControlNet and inpainting, wrapped in a calm latte-toned interface.",
+  "getStarted": "Open the app",
+  "download": "Download",
+  "featuresTitle": "Made for people who generate a lot",
+  "featureServers": "Multiple ComfyUI servers",
+  "featureServersSub": "Point Vidlatte at one or more ComfyUI instances and switch between them.",
+  "featureAuto": "Auto Image mode",
+  "featureAutoSub": "Hand prompt generation to an LLM and let Vidlatte produce endless variations.",
+  "featureGallery": "A gallery that keeps up",
+  "featureGallerySub": "Search, playlist and lock your favourites without leaving the app.",
+  "featureStudio": "Studio sessions",
+  "featureStudioSub": "Group generations by project and pick up where you left off.",
+  "downloadsTitle": "Get Vidlatte",
+  "downloadsSub": "Latest release pulled straight from GitLab.",
+  "openOnGitLab": "GitLab releases",
+  "versionLabel": "Version {version}",
+  "publishedOn": "Released {date}",
+  "noReleases": "No releases yet. Check back soon.",
+  "releasesError": "Could not load releases.",
+  "theme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeOled": "OLED",
+  "language": "Language",
+  "platformsNote": "Android, iOS, Linux, Windows, macOS and web.",
+  "flatpakNote": "Linux via Flatpak: flatpak install {url}",
+  "galleryTitle": "A look inside",
+  "footerSource": "Source on GitLab",
+  "downloadApp": "Download",
+  "prerelease": "Pre-release",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@publishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@flatpakNote": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Vidlatte",
+  "identifier": "gitlab.httpanimations.vidlatte",
+  "sourceURL": "https://gitlab.com/HttpAnimations/vidlatte-flutter/-/raw/main/repos/altstore.json",
+  "apps": [
+    {
+      "name": "Vidlatte",
+      "bundleIdentifier": "gitlab.httpanimations.vidlatte",
+      "developerName": "HttpAnimations",
+      "iconURL": "https://httpanimations.gitlab.io/vidlatte-flutter/repos/icon.png",
+      "tintColor": "B5663D",
+      "subtitle": "AI image generation powered by ComfyUI",
+      "localizedDescription": "Generate images with your own ComfyUI servers.",
+      "versions": []
+    }
+  ]
+}

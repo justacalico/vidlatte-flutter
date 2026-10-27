@@ -1,0 +1,32 @@
+app-id: gitlab.httpanimations.vidlatte
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: vidlatte
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=network
+  - --device=dri
+  - --filesystem=xdg-pictures
+  - --filesystem=xdg-download
+  - --talk-name=org.freedesktop.Notifications
+modules:
+  - name: vidlatte
+    buildsystem: simple
+    build-commands:
+      - install -d /app/lib/vidlatte /app/bin
+      - cp -r bundle /app/lib/vidlatte/bundle
+      - ln -s ../lib/vidlatte/bundle/vidlatte /app/bin/vidlatte
+      - install -Dm644 vidlatte.desktop /app/share/applications/gitlab.httpanimations.vidlatte.desktop
+      - install -Dm644 vidlatte.png /app/share/icons/hicolor/512x512/apps/gitlab.httpanimations.vidlatte.png
+    sources:
+      - type: dir
+        path: bundle
+      - type: file
+        path: ../packaging/linux/gitlab.httpanimations.vidlatte.desktop
+        dest-filename: vidlatte.desktop
+      - type: file
+        path: ../assets/icon-1024.png
+        dest-filename: vidlatte.png

@@ -1,0 +1,537 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_all:
+        type: boolean
+        default: true
+        description: 'Build all targets'
+      create_release:
+        type: boolean
+        default: false
+        description: 'Create a versioned release'
+      merge_request_id:
+        type: string
+        required: false
+        default: ''
+      merge_request_url:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+  MERGE_REQUEST_ID: ${{ inputs.merge_request_id }}
+  MERGE_REQUEST_URL: ${{ inputs.merge_request_url }}
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Setup build metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      build_number: ${{ steps.meta.outputs.build_number }}
+      build_date: ${{ steps.meta.outputs.build_date }}
+      build_all: ${{ steps.meta.outputs.build_all }}
+      targets: ${{ steps.meta.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Read version and build metadata
+        id: meta
+        run: |
+          VERSION=$(sed -n 's/^version: \([0-9.]*\).*/\1/p' pubspec.yaml | head -1)
+          BUILD_NUMBER=$(date +%s | cut -c4-10)
+          BUILD_DATE=$(date +%Y-%m-%d)
+          if [ -n "${{ inputs.build_all }}" ]; then
+            BUILD_ALL="${{ inputs.build_all }}"
+          else
+            BUILD_ALL="true"
+          fi
+          if [ "$BUILD_ALL" = "true" ]; then
+            TARGETS='[{"target":"android","os":"ubuntu-latest"},{"target":"linux","os":"ubuntu-latest"},{"target":"linux-arm64","os":"ubuntu-24.04-arm","flutter":"git"},{"target":"windows","os":"windows-2022"},{"target":"windows-arm64","os":"windows-11-arm","flutter":"git"},{"target":"macos","os":"macos-latest","flutter_arch":"arm64"},{"target":"ios","os":"macos-latest","flutter_arch":"arm64"},{"target":"web","os":"ubuntu-latest"}]'
+          else
+            TARGETS='[{"target":"android","os":"ubuntu-latest"}]'
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "build_date=$BUILD_DATE" >> "$GITHUB_OUTPUT"
+          echo "build_all=$BUILD_ALL" >> "$GITHUB_OUTPUT"
+          echo "targets=$TARGETS" >> "$GITHUB_OUTPUT"
+
+  verify:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install cocogitto
+        run: |
+          curl -fsSL --retry 3 -o /tmp/cog.tar.gz "https://github.com/cocogitto/cocogitto/releases/download/7.0.0/cocogitto-7.0.0-x86_64-unknown-linux-musl.tar.gz"
+          sudo tar -xzf /tmp/cog.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/cog'
+          cog --version
+
+      - name: Check commits
+        run: cog check
+
+      - name: Analyze and test with coverage
+        run: |
+          set -euo pipefail
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter analyze --no-pub
+          flutter test --coverage --no-pub
+          python3 - <<'PY'
+          lf = lh = 0
+          for line in open('coverage/lcov.info'):
+              if line.startswith('LF:'): lf += int(line[3:])
+              elif line.startswith('LH:'): lh += int(line[3:])
+          print(f'line coverage: {lh}/{lf}')
+          if lf == 0 or lh != lf:
+              raise SystemExit('coverage is not 100%')
+          PY
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: [setup, verify]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.targets) }}
+    env:
+      VERSION: ${{ needs.setup.outputs.version }}
+      BUILD_NUMBER: ${{ needs.setup.outputs.build_number }}
+      BUILD_DATE: ${{ needs.setup.outputs.build_date }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Java 17
+        if: matrix.target == 'android' || startsWith(matrix.target, 'linux') || matrix.target == 'web'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Flutter
+        if: matrix.flutter != 'git'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          architecture: ${{ matrix.flutter_arch || 'x64' }}
+          cache: true
+
+      - name: Install Flutter from source (arm64)
+        if: matrix.flutter == 'git'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch "${{ env.FLUTTER_VERSION }}" https://github.com/flutter/flutter.git "$HOME/flutter-sdk"
+          echo "$HOME/flutter-sdk/bin" >> "$GITHUB_PATH"
+          if [ "${{ matrix.target }}" = "linux-arm64" ]; then
+            "$HOME/flutter-sdk/bin/flutter" precache --linux
+          else
+            "$HOME/flutter-sdk/bin/flutter" precache --windows
+          fi
+
+      - name: Install Linux build dependencies
+        if: startsWith(matrix.target, 'linux')
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev libblkid-dev liblzma-dev zip dpkg-dev rpm flatpak flatpak-builder ostree
+
+      - name: Install Android SDK
+        if: matrix.target == 'android'
+        run: |
+          set -euo pipefail
+          ANDROID_HOME="$HOME/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL --retry 3 -o /tmp/cmdline-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+          unzip -q /tmp/cmdline-tools.zip -d "$ANDROID_HOME/cmdline-tools"
+          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          rm -f /tmp/cmdline-tools.zip
+          for _ in $(seq 1 50); do echo y; done | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" "ndk;26.1.10909125" >/dev/null
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+
+      - name: Setup Android signing
+        id: signing
+        if: matrix.target == 'android'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          if [ "${{ github.ref }}" != "refs/heads/main" ] && [[ ! "${{ github.ref }}" =~ ^refs/tags/ ]]; then
+            echo "signing=debug" >> "$GITHUB_OUTPUT"
+            echo "Non-main branch, using debug signing only"
+            exit 0
+          fi
+
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_STORE_PASSWORD" ] || [ -z "$ANDROID_KEY_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ]; then
+            echo "Missing Android signing configuration on a release build (main or tag). Refusing to ship a debug-signed artifact." >&2
+            exit 1
+          fi
+
+          if ! printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > android/app/vidlatte.jks 2>/dev/null; then
+            echo "Keystore base64 is invalid on a release build (main or tag). Refusing to ship a debug-signed artifact." >&2
+            exit 1
+          fi
+
+          if ! keytool -list -keystore android/app/vidlatte.jks -storepass "$ANDROID_STORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null 2>&1; then
+            echo "Keystore does not validate with the provided credentials on a release build (main or tag). Refusing to ship a debug-signed artifact." >&2
+            exit 1
+          fi
+
+          printf 'storeFile=vidlatte.jks\nstorePassword=%s\nkeyPassword=%s\nkeyAlias=%s\n' \
+            "$ANDROID_STORE_PASSWORD" "$ANDROID_KEY_PASSWORD" "$ANDROID_KEY_ALIAS" > android/app/key.properties
+          echo "signing=release" >> "$GITHUB_OUTPUT"
+
+      - name: Build Android packages
+        if: matrix.target == 'android'
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter config --enable-android
+          MR_DART_DEFINES=()
+          if [ -n "${MERGE_REQUEST_ID:-}" ]; then
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_ID="$MERGE_REQUEST_ID")
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_URL="$MERGE_REQUEST_URL")
+          fi
+          if [ "${{ steps.signing.outputs.signing }}" = "release" ]; then
+            flutter build apk --release --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+            flutter build appbundle --release --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+            cp build/app/outputs/flutter-apk/app-release.apk "$ARTIFACTS_DIR/vidlatte-android.apk"
+            cp build/app/outputs/bundle/release/app-release.aab "$ARTIFACTS_DIR/vidlatte-android.aab"
+          else
+            flutter build apk --debug --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+            flutter build appbundle --debug --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+            cp build/app/outputs/flutter-apk/app-debug.apk "$ARTIFACTS_DIR/vidlatte-android.apk"
+            cp build/app/outputs/bundle/debug/app-debug.aab "$ARTIFACTS_DIR/vidlatte-android.aab"
+          fi
+
+      - name: Build Linux desktop packages
+        if: startsWith(matrix.target, 'linux')
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter config --enable-linux-desktop
+          MR_DART_DEFINES=()
+          if [ -n "${MERGE_REQUEST_ID:-}" ]; then
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_ID="$MERGE_REQUEST_ID")
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_URL="$MERGE_REQUEST_URL")
+          fi
+          flutter build linux --release --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+          if [ "${{ matrix.target }}" = "linux-arm64" ]; then
+            LINUX_ARCH=arm64
+            DEB_ARCH=arm64
+            RPM_ARCH=aarch64
+            OUT_ARCH=arm64
+          else
+            LINUX_ARCH=x64
+            DEB_ARCH=amd64
+            RPM_ARCH=x86_64
+            OUT_ARCH=x86_64
+          fi
+          BUNDLE="build/linux/$LINUX_ARCH/release/bundle"
+          tar -czf "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.tar.gz" -C "$BUNDLE" .
+          (cd "$BUNDLE" && zip -r "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.zip" . >/dev/null)
+
+          pkgdir="$GITHUB_WORKSPACE/vidlatte-linux-$OUT_ARCH-deb"
+          rm -rf "$pkgdir"
+          mkdir -p "$pkgdir/opt/vidlatte" "$pkgdir/usr/bin" "$pkgdir/usr/share/applications" \
+            "$pkgdir/usr/share/icons/hicolor/512x512/apps" "$pkgdir/DEBIAN"
+          cp -r "$BUNDLE/." "$pkgdir/opt/vidlatte/"
+          cp assets/icon-1024.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
+          ln -sf /opt/vidlatte/vidlatte "$pkgdir/usr/bin/vidlatte"
+          install -Dm644 packaging/linux/gitlab.httpanimations.vidlatte.desktop \
+            "$pkgdir/usr/share/applications/gitlab.httpanimations.vidlatte.desktop"
+          install -Dm644 LICENSE "$pkgdir/usr/share/doc/vidlatte/copyright"
+          {
+            echo "Package: vidlatte"
+            echo "Version: $VERSION"
+            echo "Section: graphics"
+            echo "Priority: optional"
+            echo "Architecture: $DEB_ARCH"
+            echo "Maintainer: Vidlatte CI <ci@gitlab.com>"
+            echo "Depends: libgtk-3-0"
+            echo "Description: Standalone AI image generation app powered by ComfyUI."
+          } > "$pkgdir/DEBIAN/control"
+          dpkg-deb --build "$pkgdir" "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.deb" >/dev/null
+          rm -rf "$pkgdir"
+
+          ICON="$PWD/assets/icon-1024.png" ./scripts/build-rpm.sh "$BUNDLE" "$VERSION" "$RPM_ARCH" "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.rpm" "$BUILD_NUMBER"
+
+          curl -fsSL --retry 3 -o /tmp/appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$(uname -m).AppImage"
+          chmod +x /tmp/appimagetool
+          appdir="$GITHUB_WORKSPACE/vidlatte-$OUT_ARCH.AppDir"
+          rm -rf "$appdir"
+          mkdir -p "$appdir/usr/bin" "$appdir/usr/share/icons/hicolor/512x512/apps" "$appdir/usr/share/applications"
+          cp -r "$BUNDLE/." "$appdir/usr/bin/"
+          cp assets/icon-1024.png "$appdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
+          cp assets/icon-1024.png "$appdir/vidlatte.png"
+          install -m644 packaging/linux/gitlab.httpanimations.vidlatte.desktop "$appdir/vidlatte.desktop"
+          ln -sf usr/bin/vidlatte "$appdir/AppRun"
+          /tmp/appimagetool "$appdir" "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.AppImage" >/dev/null || \
+            /tmp/appimagetool --appimage-extract-and-run "$appdir" "$ARTIFACTS_DIR/vidlatte-linux-$OUT_ARCH.AppImage" >/dev/null
+          rm -rf "$appdir"
+
+      - name: Build flatpak repo
+        if: startsWith(matrix.target, 'linux')
+        env:
+          FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          if [ "${{ matrix.target }}" = "linux-arm64" ]; then
+            LINUX_ARCH=arm64
+            OUT_ARCH=aarch64
+          else
+            LINUX_ARCH=x64
+            OUT_ARCH=x86_64
+          fi
+          BUNDLE="build/linux/$LINUX_ARCH/release/bundle"
+          rm -rf flatpak/bundle
+          mkdir -p flatpak
+          cp -r "$BUNDLE" flatpak/bundle
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y --noninteractive flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+          mkdir -p .gpg && chmod 700 .gpg
+          echo "$FLATPAK_GPG_KEY" | base64 -d | gpg --batch --homedir .gpg --import
+          KEYID=$(gpg --batch --homedir .gpg --with-colons -k | awk -F: '/^pub/{print $5; exit}')
+          flatpak-builder --force-clean --repo=fp-repo \
+            --gpg-sign="$KEYID" --gpg-homedir="$GITHUB_WORKSPACE/.gpg" \
+            fp-build flatpak/gitlab.httpanimations.vidlatte.yml
+          tar -czf "$ARTIFACTS_DIR/flatpak-repo-$OUT_ARCH.tar.gz" -C fp-repo .
+
+      - name: Build Windows package
+        if: startsWith(matrix.target, 'windows')
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter config --enable-windows-desktop
+          MR_DART_DEFINES=()
+          if [ -n "${MERGE_REQUEST_ID:-}" ]; then
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_ID="$MERGE_REQUEST_ID")
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_URL="$MERGE_REQUEST_URL")
+          fi
+          flutter build windows --release --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+          if [ "${{ matrix.target }}" = "windows-arm64" ]; then
+            WIN_ARCH=arm64
+            OUT_ARCH=arm64
+          else
+            WIN_ARCH=x64
+            OUT_ARCH=x86_64
+          fi
+          RELEASE_DIR="build/windows/$WIN_ARCH/runner/Release"
+          if [ ! -d "$RELEASE_DIR" ]; then
+            echo "Expected Windows build output at $RELEASE_DIR is missing" >&2
+            exit 1
+          fi
+          powershell -NoProfile -Command \
+            "Compress-Archive -Path '$(cygpath -w "$RELEASE_DIR")\\*' -DestinationPath '$(cygpath -w "$ARTIFACTS_DIR/vidlatte-windows-$OUT_ARCH.zip")' -Force"
+
+      - name: Build macOS package
+        if: matrix.target == 'macos'
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter config --enable-macos-desktop
+          MR_DART_DEFINES=()
+          if [ -n "${MERGE_REQUEST_ID:-}" ]; then
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_ID="$MERGE_REQUEST_ID")
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_URL="$MERGE_REQUEST_URL")
+          fi
+          flutter build macos --release --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+          APP="build/macos/Build/Products/Release/vidlatte.app"
+          if [ ! -d "$APP" ]; then APP="build/macos/Build/Products/Release/Vidlatte.app"; fi
+          codesign --force --deep --sign - "$APP" || true
+          (cd "$(dirname "$APP")" && zip -r "$ARTIFACTS_DIR/vidlatte-macos-arm64.zip" "$(basename "$APP")" >/dev/null)
+          hdiutil create -volname "Vidlatte" -srcfolder "$APP" -ov -format UDZO "$ARTIFACTS_DIR/vidlatte-macos-arm64.dmg" >/dev/null
+
+      - name: Build iOS package (unsigned)
+        if: matrix.target == 'ios'
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          MR_DART_DEFINES=()
+          if [ -n "${MERGE_REQUEST_ID:-}" ]; then
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_ID="$MERGE_REQUEST_ID")
+            MR_DART_DEFINES+=(--dart-define=MERGE_REQUEST_URL="$MERGE_REQUEST_URL")
+          fi
+          flutter build ios --release --no-codesign --build-name="$VERSION" --build-number="$BUILD_NUMBER" "${MR_DART_DEFINES[@]+"${MR_DART_DEFINES[@]}"}"
+          rm -rf Payload
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r "$ARTIFACTS_DIR/vidlatte-ios-arm64-unsigned.ipa" Payload >/dev/null
+
+      - name: Build web bundles
+        if: matrix.target == 'web'
+        run: |
+          set -euo pipefail
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          flutter config --no-analytics >/dev/null
+          flutter pub get
+          flutter config --enable-web
+          flutter build web --release --base-href '/vidlatte-flutter/app/' --build-name="$VERSION" --build-number="$BUILD_NUMBER"
+          tar -czf "$ARTIFACTS_DIR/vidlatte-web-app.tar.gz" -C build/web .
+          (cd landing && flutter pub get && flutter build web --release --base-href '/vidlatte-flutter/')
+          tar -czf "$ARTIFACTS_DIR/vidlatte-web-landing.tar.gz" -C landing/build/web .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 400
+
+  release:
+    name: Tagged release
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (inputs.create_release == true || inputs.create_release == 'true'))) }}
+    permissions:
+      contents: write
+    concurrency:
+      group: release-ops
+      cancel-in-progress: false
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Determine release tag
+        id: meta
+        run: |
+          if [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            echo "release_tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            TAG="v${{ needs.setup.outputs.version }}"
+            echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "$TAG" "$GITHUB_SHA" 2>/dev/null || true
+            git push origin "$TAG" 2>/dev/null || true
+          fi
+
+      - name: Check for existing release
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download artifacts
+        if: ${{ steps.existing.outputs.exists != 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        if: ${{ steps.existing.outputs.exists != 'true' }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          find artifacts -type f -name 'vidlatte*' -exec cp {} release-assets/ \;
+          find artifacts -type f -name 'flatpak-repo-*' -exec cp {} release-assets/ \;
+          ls -la release-assets/
+
+      - name: Generate checksums
+        if: ${{ steps.existing.outputs.exists != 'true' }}
+        working-directory: release-assets
+        run: sha256sum * > ../SHA256SUMS.txt
+
+      - name: Create release
+        if: ${{ steps.existing.outputs.exists != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.release_tag }}
+          name: Vidlatte ${{ steps.meta.outputs.release_tag }}
+          generate_release_notes: true
+          files: |
+            release-assets/*
+            SHA256SUMS.txt
+
+  gitlab-sync:
+    name: Trigger GitLab sync
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: always() && needs.release.result == 'success'
+    steps:
+      - name: Trigger GitLab sync pipeline
+        run: |
+          curl -fsSL --max-time 30 --retry 2 -X POST \
+            -F token="${{ secrets.GITLAB_TRIGGER_TOKEN }}" \
+            -F "ref=main" \
+            -F "variables[GITHUB_RUN_ID]=${{ github.run_id }}" \
+            -F "variables[RELEASE_TAG]=${{ needs.release.outputs.release_tag }}" \
+            "https://gitlab.com/api/v4/projects/${{ secrets.GITLAB_PROJECT_ID }}/trigger/pipeline"
