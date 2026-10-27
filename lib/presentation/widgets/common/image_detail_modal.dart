@@ -11,7 +11,7 @@ import '../../../bloc/servers/servers_bloc.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/generated_image.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../services/comfyui_service.dart';
 import '../../../services/storage_service.dart';
 

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/prompt_history/prompt_history_bloc.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/prompt_history_entry.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 import '../common/empty_state.dart';
 
 class PromptHistorySheet extends StatefulWidget {

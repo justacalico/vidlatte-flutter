@@ -16,7 +16,7 @@ import '../../widgets/common/image_grid.dart';
 import '../../widgets/create/generation_controls.dart';
 import '../../widgets/create/progress_card.dart';
 import '../../widgets/create/prompt_input.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class StudioPage extends StatefulWidget {
   const StudioPage({super.key});

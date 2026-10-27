@@ -12,7 +12,7 @@ import '../../../data/models/collection.dart';
 import '../../../data/models/generated_image.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/common/image_detail_modal.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});

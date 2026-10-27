@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../config/constants.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class ErrorState extends StatelessWidget {
   final String message;

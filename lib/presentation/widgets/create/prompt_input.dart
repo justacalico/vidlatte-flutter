@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class PromptInput extends StatelessWidget {
   final TextEditingController controller;

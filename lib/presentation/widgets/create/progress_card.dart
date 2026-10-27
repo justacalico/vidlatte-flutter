@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/generation_job.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class ProgressCard extends StatelessWidget {
   final GenerationJob job;

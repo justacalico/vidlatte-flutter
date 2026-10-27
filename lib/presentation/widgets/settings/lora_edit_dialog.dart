@@ -5,7 +5,7 @@ import '../../../bloc/servers/servers_bloc.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/lora_metadata.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class LoraEditDialog extends StatefulWidget {
   final String serverId;

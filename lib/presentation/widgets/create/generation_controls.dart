@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../data/models/comfy_server.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 import '../common/model_dropdown.dart';
 import 'lora_picker_dialog.dart';
 

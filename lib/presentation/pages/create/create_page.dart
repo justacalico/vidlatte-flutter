@@ -27,7 +27,7 @@ import '../../widgets/create/progress_card.dart';
 import '../../widgets/create/prompt_history_sheet.dart';
 import '../../widgets/create/queue_card.dart';
 import '../../../data/models/prompt_history_entry.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class CreatePage extends StatefulWidget {
   const CreatePage({super.key});

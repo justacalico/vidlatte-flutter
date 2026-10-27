@@ -10,7 +10,7 @@ import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/settings/lora_edit_dialog.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class BrowsePage extends StatefulWidget {
   const BrowsePage({super.key});

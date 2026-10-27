@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../config/theme.dart';
-import '../../../i18n/app_strings.dart';
+import '../../../l10n/app_strings.dart';
 
 class Img2ImgInput extends StatefulWidget {
   final Uint8List? refImageBytes;
