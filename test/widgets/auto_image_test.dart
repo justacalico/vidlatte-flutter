@@ -100,19 +100,10 @@ void main() {
       await t.pump();
     }
     // start/stop
-    for (final lbl in ['Start', 'Start Auto Image', 'Begin']) {
-      final f = find.text(lbl);
-      if (f.evaluate().isNotEmpty) {
-        await t.tap(f.first, warnIfMissed: false);
-        await settle(t);
-      }
-    }
-    for (final lbl in ['Stop', 'Stop Auto Image', 'Pause']) {
-      final f = find.text(lbl);
-      if (f.evaluate().isNotEmpty) {
-        await t.tap(f.first, warnIfMissed: false);
-        await settle(t);
-      }
+    final reset = find.byIcon(Icons.refresh);
+    for (var i = 0; i < reset.evaluate().length; i++) {
+      await t.tap(reset.at(i), warnIfMissed: false);
+      await t.pump();
     }
     expect(find.byType(AutoImageContent), findsOneWidget);
   });

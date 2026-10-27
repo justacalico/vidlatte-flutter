@@ -100,14 +100,14 @@ Widget testApp({
     ],
     child: MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => SettingsBloc(storage: storage)),
-        BlocProvider(create: (_) => ServersBloc(storage: storage, comfy: comfy)),
+        BlocProvider(create: (_) => SettingsBloc(storage: storage)..add(SettingsLoadRequested())),
+        BlocProvider(create: (_) => ServersBloc(storage: storage, comfy: comfy)..add(ServersLoadRequested())),
         BlocProvider(create: (_) => GenerationBloc(storage: storage, comfy: comfy)),
-        BlocProvider(create: (_) => GalleryBloc(storage: storage)),
-        BlocProvider(create: (_) => StudioBloc(storage: storage)),
-        BlocProvider(create: (_) => LlmBloc(storage: storage, llm: llm)),
+        BlocProvider(create: (_) => GalleryBloc(storage: storage)..add(GalleryLoadRequested())),
+        BlocProvider(create: (_) => StudioBloc(storage: storage)..add(StudioLoadRequested())),
+        BlocProvider(create: (_) => LlmBloc(storage: storage, llm: llm)..add(const LlmLoadRequested())),
         BlocProvider(create: (_) => AutoGenBloc(storage: storage, llm: llm, comfy: comfy)),
-        BlocProvider(create: (_) => PromptHistoryBloc(storage: storage)),
+        BlocProvider(create: (_) => PromptHistoryBloc(storage: storage)..add(PromptHistoryLoadRequested())),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,

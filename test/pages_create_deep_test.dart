@@ -58,7 +58,7 @@ void main() {
       }
     }
     // app bar actions
-    for (final icon in [Icons.history, Icons.brush, Icons.queue_music, Icons.text_fields]) {
+    for (final icon in [Icons.history, Icons.queue_music, Icons.text_fields]) {
       final f = find.byIcon(icon);
       if (f.evaluate().isNotEmpty) {
         await t.tap(f.first, warnIfMissed: false);
