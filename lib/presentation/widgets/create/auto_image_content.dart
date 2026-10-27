@@ -539,13 +539,15 @@ class _AutoImageContentState extends State<AutoImageContent> {
                             final hasTriggers =
                                 triggers != null && triggers.isNotEmpty;
                             final selected = _selectedLoras.contains(lora);
-                            return CheckboxListTile(
-                              dense: true,
-                              activeColor: ext.accent,
-                              checkColor: Colors.white,
-                              tileColor: selected
-                                  ? ext.accent.withValues(alpha: 0.08)
-                                  : null,
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: CheckboxListTile(
+                                dense: true,
+                                activeColor: ext.accent,
+                                checkColor: Colors.white,
+                                tileColor: selected
+                                    ? ext.accent.withValues(alpha: 0.08)
+                                    : null,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                     ThemeConstants.borderRadiusSmall),
@@ -578,6 +580,7 @@ class _AutoImageContentState extends State<AutoImageContent> {
                                   }
                                 });
                               },
+                              ),
                             );
                           }).toList(),
                         ),
