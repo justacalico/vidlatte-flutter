@@ -11,7 +11,17 @@
       "tintColor": "B5663D",
       "subtitle": "AI image generation powered by ComfyUI",
       "localizedDescription": "Generate images with your own ComfyUI servers.",
-      "versions": []
+      "versions": [
+        {
+          "version": "",
+          "date": "2026-10-28T03:35:48Z",
+          "localizedDescription": "See the release notes on GitLab.",
+          "downloadURL": "https://gitlab.com/HttpAnimations/vidlatte-flutter/-/releases//downloads/vidlatte-ios-arm64-unsigned.ipa",
+          "size": 9301252,
+          "sha256": "e67f5f207f2a7d79e0fef1fe58e429ab05a4aac1a2dff4b275034e862ba27506",
+          "minOSVersion": "14.0"
+        }
+      ]
     }
   ]
 }
