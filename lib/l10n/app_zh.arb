@@ -223,6 +223,7 @@
   "system": "跟随系统",
   "light": "浅色",
   "dark": "深色",
+  "oled": "OLED 纯黑",
   "language": "语言",
   "languageSubtitle": "选择应用语言。",
   "comfyuiServers": "ComfyUI服务器",

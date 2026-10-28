@@ -223,6 +223,7 @@
   "system": "Córas",
   "light": "Geal",
   "dark": "Dorcha",
+  "oled": "OLED",
   "language": "Teanga",
   "languageSubtitle": "Roghnaigh teanga an aip.",
   "comfyuiServers": "Freastalaithe ComfyUI",

@@ -23,14 +23,11 @@ import 'package:vidlatte/data/models/prompt_history_entry.dart';
 import 'package:vidlatte/data/models/studio_session.dart';
 import 'package:vidlatte/config/theme.dart';
 import 'package:vidlatte/l10n/app_strings.dart';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:vidlatte/services/comfyui_service.dart';
 import 'package:vidlatte/services/llm_service.dart';
-import 'package:vidlatte/data/models/comfy_server.dart';
 import 'package:vidlatte/data/models/llm_model.dart';
-import 'package:vidlatte/data/models/llm_server.dart';
 import 'package:vidlatte/data/models/model_catalog.dart';
 import 'package:vidlatte/services/storage_service.dart';
 import 'package:vidlatte/services/update_checker.dart';

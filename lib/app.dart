@@ -57,17 +57,13 @@ class VidlatteApp extends StatelessWidget {
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
-          final themeMode = switch (state.settings.themeMode) {
-            'light' => ThemeMode.light,
-            'dark' => ThemeMode.dark,
-            _ => ThemeMode.system,
-          };
+          final themeMode = AppTheme.modeFor(state.settings.themeMode);
           final locale = _localeFromTag(state.settings.locale);
           return MaterialApp.router(
             title: 'Vidlatte',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            darkTheme: AppTheme.darkVariantFor(state.settings.themeMode),
             themeMode: themeMode,
             locale: locale,
             supportedLocales: AppStrings.supportedLocales,

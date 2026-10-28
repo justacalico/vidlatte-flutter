@@ -720,6 +720,9 @@ class AppStringsGa extends AppStrings {
   String get dark => 'Dorcha';
 
   @override
+  String get oled => 'OLED';
+
+  @override
   String get language => 'Teanga';
 
   @override

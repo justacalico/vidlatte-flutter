@@ -724,6 +724,9 @@ class AppStringsRu extends AppStrings {
   String get dark => 'Тёмная';
 
   @override
+  String get oled => 'OLED';
+
+  @override
   String get language => 'Язык';
 
   @override

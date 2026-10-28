@@ -222,6 +222,7 @@
   "system": "Системная",
   "light": "Светлая",
   "dark": "Тёмная",
+  "oled": "OLED",
   "language": "Язык",
   "languageSubtitle": "Выберите язык приложения.",
   "comfyuiServers": "Серверы ComfyUI",

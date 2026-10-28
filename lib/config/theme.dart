@@ -111,11 +111,21 @@ class AppTheme {
 
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
   static ThemeData get lightTheme => _buildTheme(Brightness.light);
+  static ThemeData get oledTheme => _buildTheme(Brightness.dark, oled: true);
 
-  static ThemeData _buildTheme(Brightness brightness) {
+  static ThemeMode modeFor(String themeMode) => switch (themeMode) {
+    'light' => ThemeMode.light,
+    'dark' || 'oled' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
+
+  static ThemeData darkVariantFor(String themeMode) =>
+      themeMode == 'oled' ? oledTheme : darkTheme;
+
+  static ThemeData _buildTheme(Brightness brightness, {bool oled = false}) {
     final isDark = brightness == Brightness.dark;
-    final bg = isDark ? _darkBg : _lightBg;
-    final surface = isDark ? _darkSurface : _lightSurface;
+    final bg = oled ? Colors.black : (isDark ? _darkBg : _lightBg);
+    final surface = oled ? const Color(0xFF0A0A0A) : (isDark ? _darkSurface : _lightSurface);
     final primary = isDark ? _darkPrimary : _lightPrimary;
     final error = isDark ? _darkError : _lightError;
     final ext = isDark ? AppColors.dark : AppColors.light;

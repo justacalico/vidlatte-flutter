@@ -129,6 +129,7 @@ class _ThemeSection extends StatelessWidget {
                 ('system', s.system, Icons.brightness_auto_outlined),
                 ('light', s.light, Icons.light_mode_outlined),
                 ('dark', s.dark, Icons.dark_mode_outlined),
+                ('oled', s.oled, Icons.brightness_2_outlined),
               ])
                 Expanded(
                   child: _ThemeOption(

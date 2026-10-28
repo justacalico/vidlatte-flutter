@@ -1447,6 +1447,12 @@ abstract class AppStrings {
   /// **'Dark'**
   String get dark;
 
+  /// No description provided for @oled.
+  ///
+  /// In en, this message translates to:
+  /// **'OLED'**
+  String get oled;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:

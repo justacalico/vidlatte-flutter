@@ -728,6 +728,9 @@ class AppStringsEn extends AppStrings {
   String get dark => 'Dark';
 
   @override
+  String get oled => 'OLED';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -1770,6 +1773,9 @@ class AppStringsEnGb extends AppStringsEn {
 
   @override
   String get dark => 'Dark';
+
+  @override
+  String get oled => 'OLED';
 
   @override
   String get language => 'Language';

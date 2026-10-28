@@ -223,6 +223,7 @@
   "system": "System",
   "light": "Light",
   "dark": "Dark",
+  "oled": "OLED",
   "language": "Language",
   "languageSubtitle": "Choose the app language.",
   "comfyuiServers": "ComfyUI Servers",

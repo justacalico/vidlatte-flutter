@@ -699,6 +699,9 @@ class AppStringsZh extends AppStrings {
   String get dark => '深色';
 
   @override
+  String get oled => 'OLED 纯黑';
+
+  @override
   String get language => '语言';
 
   @override
