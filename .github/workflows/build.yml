@@ -226,6 +226,21 @@ jobs:
             exit 1
           fi
 
+          echo test > /tmp/sig-src && (cd /tmp && jar cf sig-test.jar sig-src)
+          KEY_OK=0
+          for TRY_PASS in "$ANDROID_KEY_PASSWORD" "$ANDROID_STORE_PASSWORD"; do
+            if jarsigner -keystore android/app/vidlatte.jks -storepass "$ANDROID_STORE_PASSWORD" \
+                -keypass "$TRY_PASS" -signedjar /tmp/sig-signed.jar /tmp/sig-test.jar "$ANDROID_KEY_ALIAS" >/dev/null 2>&1; then
+              ANDROID_KEY_PASSWORD="$TRY_PASS"
+              KEY_OK=1
+              break
+            fi
+          done
+          if [ "$KEY_OK" != 1 ]; then
+            echo "No provided password unlocks key $ANDROID_KEY_ALIAS on a release build (main or tag). Refusing to ship a debug-signed artifact." >&2
+            exit 1
+          fi
+
           printf 'storeFile=vidlatte.jks\nstorePassword=%s\nkeyPassword=%s\nkeyAlias=%s\n' \
             "$ANDROID_STORE_PASSWORD" "$ANDROID_KEY_PASSWORD" "$ANDROID_KEY_ALIAS" > android/app/key.properties
           echo "signing=release" >> "$GITHUB_OUTPUT"

@@ -24,6 +24,7 @@ modules:
     sources:
       - type: dir
         path: bundle
+        dest: bundle
       - type: file
         path: ../packaging/linux/gitlab.httpanimations.vidlatte.desktop
         dest-filename: vidlatte.desktop
