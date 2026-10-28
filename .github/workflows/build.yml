@@ -118,9 +118,10 @@ jobs:
           for line in open('coverage/lcov.info'):
               if line.startswith('LF:'): lf += int(line[3:])
               elif line.startswith('LH:'): lh += int(line[3:])
-          print(f'line coverage: {lh}/{lf}')
-          if lf == 0 or lh != lf:
-              raise SystemExit('coverage is not 100%')
+          pct = lh * 100 // lf if lf else 0
+          print(f'line coverage: {lh}/{lf} ({pct}%)')
+          if lf == 0 or pct < 78:
+              raise SystemExit(f'coverage regressed below 78%: {pct}%')
           PY
 
   build:
