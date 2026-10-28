@@ -2,7 +2,7 @@ name: vidlatte
 description: "Standalone AI image generation app powered by ComfyUI"
 publish_to: 'none'
 
-version: 0.1.0+1
+version: 0.2.0+3157510
 
 environment:
   sdk: ^3.12.2
