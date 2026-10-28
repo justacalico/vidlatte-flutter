@@ -42,6 +42,19 @@ class AppColors extends ThemeExtension<AppColors> {
     espresso: Color(0xFF0F0B08),
   );
 
+  static const oled = AppColors(
+    accent: Color(0xFFD4956A),
+    accentSoft: Color(0xFFB07A52),
+    accentGradientStart: Color(0xFFE0A86E),
+    accentGradientEnd: Color(0xFFB5663D),
+    surfaceElevated: Color(0xFF0D0D0D),
+    border: Color(0xFF1E1E1E),
+    muted: Color(0xFF757575),
+    secondary: Color(0xFF6B4A2F),
+    crema: Color(0xFFF2E9DC),
+    espresso: Colors.black,
+  );
+
   static const light = AppColors(
     accent: Color(0xFFA86A3C),
     accentSoft: Color(0xFFC28A5C),
@@ -128,7 +141,13 @@ class AppTheme {
     final surface = oled ? const Color(0xFF0A0A0A) : (isDark ? _darkSurface : _lightSurface);
     final primary = isDark ? _darkPrimary : _lightPrimary;
     final error = isDark ? _darkError : _lightError;
-    final ext = isDark ? AppColors.dark : AppColors.light;
+    final ext = oled ? AppColors.oled : (isDark ? AppColors.dark : AppColors.light);
+    final fill = oled
+        ? const Color(0xFF0A0A0A)
+        : (isDark ? const Color(0xFF1A140F) : const Color(0xFFEFE6D7));
+    final raised = oled
+        ? const Color(0xFF111111)
+        : (isDark ? const Color(0xFF241D17) : const Color(0xFFEFE6D7));
 
     const displayFont = TextStyle();
     const bodyFont = TextStyle();
@@ -180,7 +199,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? const Color(0xFF1A140F) : const Color(0xFFEFE6D7),
+        fillColor: fill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ThemeConstants.borderRadiusSmall),
           borderSide: BorderSide(color: ext.border, width: 0.5),
@@ -260,7 +279,7 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: isDark ? const Color(0xFF241D17) : const Color(0xFFEFE6D7),
+        backgroundColor: raised,
         selectedColor: ext.accent.withValues(alpha: 0.18),
         labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         side: BorderSide(color: ext.border, width: 0.5),
@@ -338,7 +357,7 @@ class AppTheme {
       ),
       iconTheme: IconThemeData(color: primary, size: 22),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? const Color(0xFF241D17) : const Color(0xFF2A1F17),
+        backgroundColor: isDark ? raised : const Color(0xFF2A1F17),
         contentTextStyle: TextStyle(color: isDark ? const Color(0xFFF2E9DC) : Colors.white, fontSize: 14),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

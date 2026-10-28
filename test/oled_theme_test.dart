@@ -16,7 +16,11 @@ void main() {
     expect(t.brightness, Brightness.dark);
     expect(t.scaffoldBackgroundColor, Colors.black);
     expect(t.colorScheme.surface, const Color(0xFF0A0A0A));
-    expect(t.extension<AppColors>(), isNotNull);
+    final ext = t.extension<AppColors>()!;
+    expect(ext.surfaceElevated, const Color(0xFF0D0D0D));
+    expect(ext.border, const Color(0xFF1E1E1E));
+    expect(t.inputDecorationTheme.fillColor, const Color(0xFF0A0A0A));
+    expect(t.chipTheme.backgroundColor, const Color(0xFF111111));
   });
 
   testWidgets('settings: oled option dispatches ThemeModeChanged', (t) async {
