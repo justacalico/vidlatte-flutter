@@ -29,5 +29,5 @@ modules:
         path: ../packaging/linux/gitlab.httpanimations.vidlatte.desktop
         dest-filename: vidlatte.desktop
       - type: file
-        path: ../assets/icon-1024.png
+        path: ../assets/icon-512.png
         dest-filename: vidlatte.png

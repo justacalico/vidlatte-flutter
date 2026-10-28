@@ -306,7 +306,7 @@ jobs:
           mkdir -p "$pkgdir/opt/vidlatte" "$pkgdir/usr/bin" "$pkgdir/usr/share/applications" \
             "$pkgdir/usr/share/icons/hicolor/512x512/apps" "$pkgdir/DEBIAN"
           cp -r "$BUNDLE/." "$pkgdir/opt/vidlatte/"
-          cp assets/icon-1024.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
+          cp assets/icon-512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
           ln -sf /opt/vidlatte/vidlatte "$pkgdir/usr/bin/vidlatte"
           install -Dm644 packaging/linux/gitlab.httpanimations.vidlatte.desktop \
             "$pkgdir/usr/share/applications/gitlab.httpanimations.vidlatte.desktop"
@@ -332,7 +332,7 @@ jobs:
           rm -rf "$appdir"
           mkdir -p "$appdir/usr/bin" "$appdir/usr/share/icons/hicolor/512x512/apps" "$appdir/usr/share/applications"
           cp -r "$BUNDLE/." "$appdir/usr/bin/"
-          cp assets/icon-1024.png "$appdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
+          cp assets/icon-512.png "$appdir/usr/share/icons/hicolor/512x512/apps/vidlatte.png"
           cp assets/icon-1024.png "$appdir/vidlatte.png"
           install -m644 packaging/linux/gitlab.httpanimations.vidlatte.desktop "$appdir/vidlatte.desktop"
           ln -sf usr/bin/vidlatte "$appdir/AppRun"
