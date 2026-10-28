@@ -167,7 +167,7 @@ github-release-sync:
 pages:
   stage: deploy
   tags: [linux-truenas]
-  image: ghcr.io/cirruslabs/flutter:3.47.7
+  image: ghcr.io/cirruslabs/flutter:stable
   resource_group: pages-deploy
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -176,8 +176,11 @@ pages:
   variables:
     GLAB_ENABLE_CI_AUTOLOGIN: "true"
     GLAB_VERSION: "1.113.0"
+    FLUTTER_VERSION: "3.47.7"
   before_script:
     - apt-get update -qq && apt-get install -y -qq curl git jq flatpak ostree gpg
+    - git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git /opt/flutter-sdk
+    - export PATH="/opt/flutter-sdk/bin:$PATH"
     - bash scripts/install-glab.sh
   script:
     - bash scripts/build-pages.sh
